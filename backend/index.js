@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const authRouter = require('./routes/auth.routes')
 const userRouter = require('./routes/user.routes')
+const postRouter = require('./routes/post.routes')
 const connectDB = require('./config/connectDB')
 const cookieParser = require('cookie-parser')
 const cloudinary = require('cloudinary').v2
@@ -24,6 +25,7 @@ app.use(cookieParser())
 
 app.use('/api/auth', authRouter)
 app.use('/api/users', userRouter)
+app.use('/api/posts', postRouter)
 
 app.listen(PORT, async () => {
     console.log(`Server listening on ${PORT}`);

@@ -1,4 +1,5 @@
 const User = require('../models/user.model')
+const Notification = require('../models/notification.model')
 const HTTPSTATUS = require('../config/http.config')
 const bcrypt = require('bcrypt')
 const cloudinary = require('cloudinary').v2
@@ -48,6 +49,12 @@ async function followUnfollowController(req, res) {
             //follow
             await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } })
             await User.findByIdAndUpdate(req.user._id, { $push: { followings: id } })
+            const notification = new Notification({
+                from: req.user._id,
+                to: id,
+                type: 'follow'
+            })
+            await notification.save()
             res.status(HTTPSTATUS.OK).json('Followed successfully')
 
         }
@@ -152,7 +159,7 @@ async function updateUserController(req, res) {
         }
 
         if (currentPassword && newPassword) {
-            if (newPassword < 6) return res.status(HTTPSTATUS.BAD_REQUEST).json('New password must not be less that 6 characters')
+            if (newPassword.length < 6) return res.status(HTTPSTATUS.BAD_REQUEST).json('New password must not be less that 6 characters')
             const isMatch = await bcrypt.compare(currentPassword, user.password)
             if (!isMatch) return res.status(HTTPSTATUS.BAD_REQUEST).json('Current password is incorrect')
             user.password = await bcrypt.hash(newPassword, 10);
