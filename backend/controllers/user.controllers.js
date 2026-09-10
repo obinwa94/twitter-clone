@@ -7,9 +7,9 @@ require('dotenv').config()
 
 
 async function getProfileController(req, res) {
-    const { userName } = req.params;
+    const username = req.params.username;
     try {
-        const user = await User.findOne({ userName })
+        const user = await User.findOne({ userName: username }).select('-password')
         if (!user) return res.status(HTTPSTATUS.NOT_FOUND).json({
             message: 'User does not exist'
         })
