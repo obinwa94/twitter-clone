@@ -19,6 +19,6 @@ authRouter.post('/logout', logoutController)
 
 //Login get
 
-authRouter.get('/login', verifyToken, authLogin )
+authRouter.get('/me', verifyToken, authLogin )
 
 module.exports = authRouter;

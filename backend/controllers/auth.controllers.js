@@ -15,7 +15,13 @@ async function signupController(req, res) {
         const emailExist = await User.findOne({ email })
         if (emailExist) {
             return res.status(HTTPSTATUS.CONFLICT).json({
-                message: 'User already exist'
+                message: 'Email already exist'
+            })
+        }
+        const usernameExist = await User.findOne({ userName })
+        if (usernameExist) {
+            return res.status(HTTPSTATUS.CONFLICT).json({
+                message: 'Username already taken'
             })
         }
         if (password.length < 6) {
