@@ -186,29 +186,41 @@ async function getLikedPostController(req, res) {
 }
 async function getFollowingPostController(req, res) {
     try {
-        const user = await User.findById(req.user._id)
-        if (!user) return res.status(HTTPSTATUS.NOT_FOUND).json('User not found')
-        const followingsPost = user.followings
-        if (!followingsPost) {
-            res.status(HTTPSTATUS.OK).json({
-                success: true,
-                Quantity: followingsPost.length,
-                message: 'Get method successful',
-                data: []
-            })
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(HTTPSTATUS.NOT_FOUND).json({
+                success: false,
+                message: "User not found",
+            });
         }
-        res.status(HTTPSTATUS.OK).json({
-            success: true,
-            Quantity: followingsPost.length,
-            message: 'Get method successful',
-            data: followingsPost
+
+        const followingPosts = await Post.find({
+            user: { $in: user.followings },
         })
+            .sort({ createdAt: -1 })
+            .populate({
+                path: "user",
+                select: "-password",
+            })
+            .populate({
+                path: "comments.user",
+                select: "-password",
+            });
+
+        return res.status(HTTPSTATUS.OK).json({
+            success: true,
+            quantity: followingPosts.length,
+            message: "Get method successful",
+            data: followingPosts,
+        });
+
     } catch (error) {
         return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: 'Something went wrong😥',
-            error: error.message
-        })
+            message: "Something went wrong😥",
+            error: error.message,
+        });
     }
 }
 async function getUserPostController(req, res) {

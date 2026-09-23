@@ -13,9 +13,19 @@ import { useNavigate } from "react-router-dom";
 const Sidebar = () => {
 	const queryClient = useQueryClient()
 	const navigate = useNavigate()
-	
-	const {data} = useQuery({queryKey: ["authUser"]})
 
+	const { data } = useQuery({
+		queryKey: ["authUser"],
+		queryFn: async () => {
+			const res = await fetch("/api/auth/me");
+
+			if (!res.ok) {
+				throw new Error("Failed to fetch authenticated user");
+			}
+
+			return res.json();
+		},
+	});
 	const { mutate, isPending, isError, error } = useMutation({
 		mutationFn: async () => {
 			const res = await fetch("/api/auth/logout", {

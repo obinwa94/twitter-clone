@@ -22,5 +22,4 @@ postRouter.post('/comments/:id', verifyToken, postCommentController)
 postRouter.get('/', verifyToken, getAllController)
 postRouter.delete('/delete/:id', verifyToken, deletePostController)
 
-
 module.exports = postRouter;

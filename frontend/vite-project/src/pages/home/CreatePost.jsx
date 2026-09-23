@@ -49,7 +49,7 @@ const CreatePost = () => {
 				{img && (
 					<div className='relative w-72 mx-auto'>
 						<IoCloseSharp
-							className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
+							className='absolute top-0 right-0 text-white bg-gray-800 hover:bg-red-800 rounded-full w-5 h-5 cursor-pointer'
 							onClick={() => {
 								setImg(null);
 								imgRef.current.value = null;
@@ -62,13 +62,13 @@ const CreatePost = () => {
 				<div className='flex justify-between border-t py-2 border-t-gray-700'>
 					<div className='flex gap-1 items-center'>
 						<CiImageOn
-							className='fill-primary w-6 h-6 cursor-pointer'
+							className='text-gray-700 w-6 h-6 cursor-pointer hover:text-blue-800'
 							onClick={() => imgRef.current.click()}
 						/>
-						<BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
+						<BsEmojiSmileFill className='text-primary hover:text-blue-800 w-5 h-5 cursor-pointer' />
 					</div>
 					<input type='file' hidden ref={imgRef} onChange={handleImgChange} />
-					<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
+					<button className='btn btn-primary rounded-full btn-sm text-white px-4 hover:bg-blue-800'>
 						{isPending ? "Posting..." : "Post"}
 					</button>
 				</div>

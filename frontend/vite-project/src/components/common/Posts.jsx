@@ -1,24 +1,49 @@
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
-// import { POSTS } from "../../utils/db/dummy";
 import { useQuery } from "@tanstack/react-query";
+import { FaCircleQuestion } from "react-icons/fa6";
 
-const Posts = () => {
-	const { data: POSTS, isLoading, isError, error } = useQuery({
-		queryKey: ["posts"],
-		queryFn: async () => {
-			const res = await fetch("/api/posts/")
-			const data = await res.json()
-			
-			if (!res.ok) {
-				throw new Error(data.message || "Something went wrong");
+const Posts = ({ feedType }) => {
 
-			}
+	const getPostEndpoint = () => {
+		switch (feedType) {
+			case "forYou":
+				return "/api/posts/";
 
-			return data.data;
+			case "following":
+				return "/api/posts/following";
+
+			default:
+				return "/api/posts/";
 		}
-	})
+	};
 
+	const POST_ENDPOINT = getPostEndpoint();
+
+	const {
+		data: POSTS,
+		isLoading,
+		isError,
+		error,
+		isFetching,
+	} = useQuery({
+		queryKey: ["posts", feedType],
+
+		queryFn: async () => {
+			const res = await fetch(POST_ENDPOINT);
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(
+					data.message || "Something went wrong"
+				);
+			}
+			console.log("fetched data: ", data.data);
+			
+			return data.data;
+		},
+	});
 
 	if (isError) {
 		return (
@@ -27,25 +52,40 @@ const Posts = () => {
 			</p>
 		);
 	}
-
+            
 	return (
+		
 		<>
-			{isLoading && (
-				<div className='flex flex-col justify-center'>
+			{(isLoading || isFetching) && (
+				<div className="flex flex-col justify-center">
 					<PostSkeleton />
 					<PostSkeleton />
 					<PostSkeleton />
 				</div>
 			)}
-			{!isLoading && POSTS?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
+
+			{!isLoading && POSTS?.length === 0 && (
+				<p className="text-center my-4">
+					No posts in this tab. Switch 👻
+				</p>
+			)}
+
 			{!isLoading && POSTS && (
+
 				<div>
-					{POSTS.map((post) => (
-						<Post key={post._id} post={post} />
-					))}
+					{POSTS.map((post) => {
+						return (
+
+							<Post
+								key={post._id}
+								post={post}
+							/>
+						)
+					})}
 				</div>
 			)}
 		</>
 	);
 };
+
 export default Posts;
