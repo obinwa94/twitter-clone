@@ -7,12 +7,10 @@ import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 
 const Sidebar = () => {
 	const queryClient = useQueryClient()
-	const navigate = useNavigate()
 
 	const { data } = useQuery({
 		queryKey: ["authUser"],

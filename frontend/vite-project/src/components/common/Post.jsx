@@ -5,29 +5,139 @@ import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { formatDistanceToNow } from "date-fns";
 
 const Post = ({ post }) => {
+	const queryClient = useQueryClient();
 	const [comment, setComment] = useState("");
+	const { data: authUser } = useQuery({
+		queryKey: ["authUser"],
+		queryFn: async () => {
+			const res = await fetch("/api/auth/me");
+
+			if (!res.ok) {
+				throw new Error("Failed to fetch authenticated user");
+			}
+
+			return res.json();
+		},
+	})
+	const { mutate: deletePost, isPending } = useMutation({
+		mutationFn: async () => {
+
+			const res = await fetch(`/api/posts/delete/${post._id}`, {
+				method: "DELETE"
+			})
+			const data = await res.json()
+			if (!res.ok) {
+				throw new Error(data.message || "Something went wrong");
+			}
+			return data
+		},
+		onSuccess: () => {
+			toast.success('Post deleted successfully!');
+
+			queryClient.invalidateQueries({
+				queryKey: ["posts"],
+			});
+		},
+		onError: () => {
+			toast.error('Unable to delete post')
+		}
+	})
+	const { mutate: commentPost, isPending: isCommenting } = useMutation({
+		mutationFn: async (commentText) => {
+
+			const res = await fetch(`/api/posts/comment/${post._id}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					text: commentText
+				})
+			})
+			const data = await res.json()
+			if (!res.ok) {
+				throw new Error(data.message || "Something went wrong");
+			}
+			return data
+		},
+		onSuccess: () => {
+			toast.success('Comment successful');
+
+			queryClient.invalidateQueries({
+				queryKey: ["posts"],
+			});
+			setComment("")
+
+		},
+		onError: () => {
+			toast.error('Unable to comment on post')
+		}
+	})
+	const { mutate: likePost, isPending: isLiking } = useMutation({
+		mutationFn: async () => {
+
+			const res = await fetch(`/api/posts/like/${post._id}`, {
+				method: "POST",
+				
+			})
+			const data = await res.json()
+			console.log("DTAT: ", data);
+			
+			if (!res.ok) {
+				throw new Error(data.message || "Something went wrong");
+			}
+			return data
+		},
+		
+		onSuccess: () => {
+			
+			// toast.success();
+
+			queryClient.invalidateQueries({
+				queryKey: ["posts"],
+			});
+
+		},
+		onError: () => {
+			toast.error('Unable to like post')
+		}
+	})
+
 	const postOwner = post.user;
-	
-	const isLiked = false;
 
-	const isMyPost = false;
+	const isLiked = post.likes.includes(authUser?._id);
 
-	const formattedDate = "1h";
+	const isMyPost = authUser?._id === post.user._id;
 
-	const isCommenting = false;
+	const formattedDate = formatDistanceToNow(new Date(post.createdAt), {
+		addSuffix: true,
+	});
 
-	const handleDeletePost = () => {};
+
+	const handleDeletePost = () => {
+		deletePost()
+	};
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		if (!comment.trim()) {
+			return;
+		}
+		commentPost(comment);
 	};
 
-	const handleLikePost = () => {};
+	const handleLikePost = (e) => {
+		e.preventDefault();
+		likePost()
+	 };
 
 	return (
-	
+
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
 				<div className='avatar'>
@@ -47,7 +157,10 @@ const Post = ({ post }) => {
 						</span>
 						{isMyPost && (
 							<span className='flex justify-end flex-1'>
-								<FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />
+								<FaTrash className={`cursor-pointer hover:text-red-500 ${isPending ? "opacity-50 pointer-events-none" : ""
+									}`}
+
+									onClick={handleDeletePost} />
 							</span>
 						)}
 					</div>
@@ -137,9 +250,8 @@ const Post = ({ post }) => {
 								{isLiked && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
 								<span
-									className={`text-sm text-slate-500 group-hover:text-pink-500 ${
-										isLiked ? "text-pink-500" : ""
-									}`}
+									className={`text-sm text-slate-500 group-hover:text-pink-500 ${isLiked ? "text-pink-500" : ""
+										}`}
 								>
 									{post.likes.length}
 								</span>

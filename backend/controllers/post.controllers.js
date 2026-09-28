@@ -227,9 +227,9 @@ async function getUserPostController(req, res) {
     const username = req.params.username
     try {
 
-        const user = await User.findOne({userName: username})
-        if(!user) return res.status(HTTPSTATUS.NOT_FOUND).json('User not found')
-        const posts = await Post.find({user: user._id}).sort({ createdAt: -1 })
+        const user = await User.findOne({ userName: username })
+        if (!user) return res.status(HTTPSTATUS.NOT_FOUND).json('User not found')
+        const posts = await Post.find({ user: user._id }).sort({ createdAt: -1 })
             .populate({ path: 'user', select: '-password' })
             .populate({ path: 'comments.user', select: '-password' })
         if (!posts) {
@@ -278,6 +278,42 @@ async function deletePostController(req, res) {
         })
     }
 }
+async function repostController(req, res) {
+    const myId = req.user._id
+    const postId = req.params.id
+    try {
+        const post = await Post.findById(postId);
+
+        if (!post) return res.status(HTTPSTATUS.NOT_FOUND).json('Post not found')
+
+        const alreadyReposted = post.reposts.includes(myId)
+
+        if (!alreadyReposted) {
+            post.reposts.push(myId)
+            await post.save()
+            await post.populate({path: "reposts.user", select: "-password"})
+            res.status(HTTPSTATUS.OK).json({
+                success: true,
+                message: 'Reposted successfully',
+                data: post
+            })
+        }
+        if (alreadyReposted) {
+            post.reposts = post.reposts.filter((id) => id.toString() !== myId.toString())
+            await post.save()
+            res.status(HTTPSTATUS.OK).json({
+                success: true,
+                message: 'Unreposted successfully'
+            })
+        }
+    } catch (error) {
+        return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: 'Something went wrong😥',
+            error: error.message
+        })
+    }
+}
 
 
 module.exports = {
@@ -288,5 +324,6 @@ module.exports = {
     deletePostController,
     getLikedPostController,
     getFollowingPostController,
-    getUserPostController
+    getUserPostController,
+    repostController
 }

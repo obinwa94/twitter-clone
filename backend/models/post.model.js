@@ -25,12 +25,22 @@ const postSchema = new mongoose.Schema({
         },
         user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref:User,
+            ref: User,
             required: true
         }
+    }],
+    reposts: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+        },
     }]
-    
-}, {timestamps: true})
+
+}, { timestamps: true })
 
 const Post = mongoose.model('Post', postSchema)
 
