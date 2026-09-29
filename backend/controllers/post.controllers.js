@@ -38,6 +38,59 @@ async function createPostController(req, res) {
     }
 }
 
+// async function createPostController(req, res) {
+//     const { text } = req.body;
+//     let { img } = req.body;
+
+//     const userId = req.user._id.toString();
+  
+//     try {
+//         const user = await User.findById(userId);
+
+//         if (!user) {
+//             return res.status(HTTPSTATUS.NOT_FOUND).json({
+//                 success: false,
+//                 message: "User not found",
+//             });
+//         }
+
+//         if (!text?.trim() && !img) {
+//             return res.status(HTTPSTATUS.BAD_REQUEST).json({
+//                 success: false,
+//                 message: "Either text or image is required",
+//             });
+//         }
+
+//         // Upload image to Cloudinary
+//         if (img) {
+//             const uploadResponse = await cloudinary.uploader.upload(img);
+
+//             img = uploadResponse.secure_url;
+//         }
+
+//         // Create post with Cloudinary URL
+//         const newPost = new Post({
+//             text,
+//             img,
+//             user: userId,
+//         });
+
+//         await newPost.save();
+
+//         return res.status(HTTPSTATUS.CREATED).json({
+//             success: true,
+//             message: "Post created",
+//             data: newPost,
+//         });
+//     } catch (error) {
+//         return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
+//             success: false,
+//             message: "Something went wrong 😥",
+//             error: error.message,
+//         });
+//     }
+// }
+
 async function likeUnlikeController(req, res) {
     const postId = req.params.id
 
