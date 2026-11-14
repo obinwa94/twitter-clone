@@ -1,91 +1,97 @@
+
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
-import { FaCircleQuestion } from "react-icons/fa6";
 
-const Posts = ({ feedType }) => {
+const Posts = ({ feedType, userId, user }) => {
 
-	const getPostEndpoint = () => {
-		switch (feedType) {
-			case "forYou":
-				return "/api/posts/";
+    const getPostEndpoint = () => {
+        switch (feedType) {
+            case "forYou":
+                return "/api/posts/";
 
-			case "following":
-				return "/api/posts/following";
+            case "following":
+                return "/api/posts/following";
 
-			default:
-				return "/api/posts/";
-		}
-	};
+            case "posts":
+                return `/api/posts/${encodeURIComponent(user.userName)}`;
 
-	const POST_ENDPOINT = getPostEndpoint();
+            case "likes":
+                return "/api/posts/liked";
 
-	const {
-		data: POSTS,
-		isLoading,
-		isError,
-		error,
-		isFetching,
-	} = useQuery({
-		queryKey: ["posts", feedType],
+            default:
+                return "/api/posts/";
+        }
+    };
 
-		queryFn: async () => {
-			const res = await fetch(POST_ENDPOINT);
+    const POST_ENDPOINT = getPostEndpoint();
 
-			const data = await res.json();
+    const {
+        data: POSTS,
+        isLoading,
+        isError,
+        error,
+        isFetching,
+    } = useQuery({
+        queryKey: ["posts", feedType, userId, user?.userName],
 
-			if (!res.ok) {
-				throw new Error(
-					data.message || "Something went wrong"
-				);
-			}
-			console.log("fetched data: ", data.data);
-			
-			return data.data;
-		},
-	});
+        queryFn: async () => {
+            const res = await fetch(POST_ENDPOINT);
 
-	if (isError) {
-		return (
-			<p className="text-center my-4 text-red-500">
-				{error.message}
-			</p>
-		);
-	}
-            
-	return (
-		
-		<>
-			{(isLoading || isFetching) && (
-				<div className="flex flex-col justify-center">
-					<PostSkeleton />
-					<PostSkeleton />
-					<PostSkeleton />
-				</div>
-			)}
+            const data = await res.json();
 
-			{!isLoading && POSTS?.length === 0 && (
-				<p className="text-center my-4">
-					No posts in this tab. Switch 👻
-				</p>
-			)}
+            if (!res.ok) {
+                throw new Error(
+                    data.message || "Something went wrong"
+                );
+            }
 
-			{!isLoading && POSTS && (
+            return data.data;
+        },
 
-				<div>
-					{POSTS.map((post) => {
-						return (
+        enabled:
+            feedType === "forYou" ||
+            feedType === "following" ||
+            (feedType === "posts" && Boolean(user?.userName)) ||
+            (feedType === "likes" && Boolean(userId)),
+    });
 
-							<Post
-								key={post._id}
-								post={post}
-							/>
-						)
-					})}
-				</div>
-			)}
-		</>
-	);
+    if (isError) {
+        return (
+            <p className="text-center my-4 text-red-500">
+                {error.message}
+            </p>
+        );
+    }
+
+    return (
+        <>
+            {(isLoading || isFetching) && (
+                <div className="flex flex-col justify-center">
+                    <PostSkeleton />
+                    <PostSkeleton />
+                    <PostSkeleton />
+                </div>
+            )}
+
+            {!isLoading && !isFetching && POSTS?.length === 0 && (
+                <p className="text-center my-4">
+                    No posts in this tab. Switch 👻
+                </p>
+            )}
+
+            {!isLoading && !isFetching && POSTS && (
+                <div>
+                    {POSTS.map((post) => (
+                        <Post
+                            key={post._id}
+                            post={post}
+                        />
+                    ))}
+                </div>
+            )}
+        </>
+    );
 };
 
 export default Posts;

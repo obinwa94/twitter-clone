@@ -4,6 +4,7 @@ const {
     likeUnlikeController,
     postCommentController,
     getAllController,
+    getByIdController,
     deletePostController,
     getLikedPostController,
     getFollowingPostController,
@@ -21,6 +22,7 @@ postRouter.get('/following', verifyToken, getFollowingPostController)
 postRouter.get('/:username', verifyToken, getUserPostController)
 postRouter.post('/comment/:id', verifyToken, postCommentController)
 postRouter.get('/', verifyToken, getAllController)
+postRouter.get('/:id', verifyToken, getByIdController)
 postRouter.delete('/delete/:id', verifyToken, deletePostController)
 postRouter.post('/repost/:id', verifyToken, repostController)
 

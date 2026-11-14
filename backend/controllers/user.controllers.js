@@ -44,7 +44,7 @@ async function followUnfollowController(req, res) {
             //unfollow
             await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } })
             await User.findByIdAndUpdate(req.user._id, { $pull: { followings: id } })
-            res.status(HTTPSTATUS.OK).json('Unfollowed successfully')
+            res.status(HTTPSTATUS.OK).json({success: true, message: 'Unfollowed successfully'})
         } else {
             //follow
             await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } })
@@ -55,7 +55,7 @@ async function followUnfollowController(req, res) {
                 type: 'follow'
             })
             await notification.save()
-            res.status(HTTPSTATUS.OK).json('Followed successfully')
+            res.status(HTTPSTATUS.OK).json({success: true, message: 'Followed successfully'})
 
         }
     } catch (error) {

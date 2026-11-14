@@ -210,6 +210,32 @@ async function getAllController(req, res) {
         })
     }
 }
+
+
+async function getByIdController(req, res) {
+    const postId = req.params.id
+
+    try {
+        const post = await Post.findById(postId)
+            .populate({ path: 'user', select: '-password' })
+            .populate({ path: 'comments.user', select: '-password' })
+
+        if (!post) return res.status(HTTPSTATUS.NOT_FOUND).json('Post not found')
+
+        res.status(HTTPSTATUS.OK).json({
+            success: true,
+            message: 'Get method successful',
+            data: post
+        })
+    } catch (error) {
+        return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: 'Something went wrong😥',
+            error: error.message
+        })
+    }
+}
+
 async function getLikedPostController(req, res) {
     try {
         const user = await User.findById(req.user._id)
@@ -378,5 +404,6 @@ module.exports = {
     getLikedPostController,
     getFollowingPostController,
     getUserPostController,
-    repostController
+    repostController,
+    getByIdController
 }
