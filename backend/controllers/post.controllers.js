@@ -236,33 +236,36 @@ async function getByIdController(req, res) {
     }
 }
 
+
 async function getLikedPostController(req, res) {
     try {
-        const user = await User.findById(req.user._id)
-        if (!user) return res.status(HTTPSTATUS.NOT_FOUND).json('User not found')
-        const likedPosts = user.likedPosts
-        if (!likedPosts) {
-            res.status(HTTPSTATUS.OK).json({
-                success: true,
-                Quantity: likedPosts.length,
-                message: 'Get method successful',
-                data: []
-            })
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(HTTPSTATUS.NOT_FOUND).json({
+                success: false,
+                message: "User not found"
+            });
         }
-        res.status(HTTPSTATUS.OK).json({
+
+        const likedPosts = user.likedPosts || [];
+
+        return res.status(HTTPSTATUS.OK).json({
             success: true,
             Quantity: likedPosts.length,
-            message: 'Get method successful',
+            message: "Get method successful",
             data: likedPosts
-        })
+        });
+
     } catch (error) {
         return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: 'Something went wrong😥',
+            message: "Something went wrong😥",
             error: error.message
-        })
+        });
     }
 }
+
 async function getFollowingPostController(req, res) {
     try {
         const user = await User.findById(req.user._id);

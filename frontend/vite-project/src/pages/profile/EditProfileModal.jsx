@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-const EditProfileModal = ({authUser}) => {
+const EditProfileModal = (authUser) => {
     const [formData, setFormData] = useState({
         fullName: "",
         username: "",
